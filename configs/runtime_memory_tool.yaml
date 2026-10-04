@@ -1,0 +1,273 @@
+tools:
+  - class_name: tools.runtime_memory_tool.RuntimeMemoryTool
+    config: &runtime_memory_config
+      type: native
+      # Provider credentials are independent from model routes. A route inherits
+      # these fields from its provider and may override any field locally.
+      providers:
+        openrouter:
+          api_type: openai_compatible
+          api_base: https://openrouter.ai/api/v1
+          api_base_env: OPENROUTER_BASE_URL
+          api_key_env: OPENROUTER_API_KEY
+      # The routing pool is fixed by config; instruction remains open-ended but
+      # is kept short enough to specify an operation rather than carry its result.
+      instruction_max_chars: 512
+      # Each tool ranks its own corpus against the policy's retrieval_query:
+      # runtime_memory uses raw chunks; retrieve_memory uses compressed memory.
+      # instruction is reserved for external processing.
+      # DYNAMIC_RETRIEVAL_TOP_K is a positive per-call upper bound.
+      # The policy requests the actual count with evidence_count.
+      dynamic_retrieval:
+        model_id: Qwen/Qwen3-Embedding-0.6B
+        device: cpu
+        batch_size: 32
+        document_cache_size: 8
+        # The tools share one embedding model per worker, but keep independent
+        # corpus embeddings, cache keys, rankings, and results.
+        shared_worker_key: runtime_memory_tools
+      # Optional local Mem-Gallery repository root or data/ directory. Leave null
+      # to resolve portable image references from the Hugging Face cache/repository.
+      image_root: null
+      # Bound locally resolved image inputs before base64 encoding so routed VLM
+      # providers do not reject oversized dimensions or request payloads.
+      image_processing:
+        max_edge_pixels: 2048
+        max_bytes: 4194304
+        jpeg_quality: 90
+      external_call:
+        timeout: 60
+        max_tokens: 512
+        temperature: 0.0
+        max_trials: 6
+        retry_sleep: 1.0
+      # Evaluation profiles for models outside the routing pool.
+      # Latency coefficients are fixed estimates.
+      resource_accounting:
+        default_policy_model: Qwen/Qwen3-4B-Instruct-2507
+        model_profiles:
+          - model: Qwen/Qwen3-4B-Instruct-2507
+            latency:
+              base_seconds: 0.332
+              input_seconds_per_token: 0.000003
+              output_seconds_per_token: 0.00664
+              image_seconds: 0.0
+            pricing:
+              input_per_million_usd: 0.05
+              output_per_million_usd: 0.25
+          - model: Qwen/Qwen3-VL-4B-Instruct
+            latency:
+              base_seconds: 0.332
+              input_seconds_per_token: 0.000003
+              output_seconds_per_token: 0.00664
+              image_seconds: 0.15
+            pricing:
+              input_per_million_usd: 0.05
+              output_per_million_usd: 0.25
+          - model: qwen/qwen3.5-9b
+            latency:
+              base_seconds: 0.70
+              input_seconds_per_token: 0.000003
+              output_seconds_per_token: 0.007518797
+              image_seconds: 0.25
+            pricing:
+              input_per_million_usd: 0.10
+              output_per_million_usd: 0.15
+          - model: openai/gpt-5-mini
+            latency:
+              base_seconds: 3.47
+              input_seconds_per_token: 0.000003
+              output_seconds_per_token: 0.017543860
+              image_seconds: 0.30
+            pricing:
+              input_per_million_usd: 0.25
+              output_per_million_usd: 2.00
+      # Each active route owns reference pricing and a profiled latency proxy.
+      model_pool:
+        # `name` is the neutral policy-visible value of arguments.model. Only `kind`
+        # (converted to input modalities) and `parameter_count` enter its model card;
+        # backend identity, provider, pricing, latency, and intended use remain runtime-only.
+        - name: model_b791
+          kind: vlm
+          parameter_count: 8B
+          provider: openrouter
+          model: qwen/qwen3-vl-8b-instruct
+          latency:
+            base_seconds: 0.332
+            input_seconds_per_token: 0.000003
+            output_seconds_per_token: 0.00664
+            image_seconds: 0.225
+            provider_endpoint: alibaba/fp8
+          pricing:
+            input_per_million_usd: 0.117
+            output_per_million_usd: 0.455
+        - name: model_3d8e
+          kind: vlm
+          parameter_count: 30B total, 3B active
+          provider: openrouter
+          model: qwen/qwen3-vl-30b-a3b-instruct
+          latency:
+            base_seconds: 0.438
+            input_seconds_per_token: 0.000066
+            output_seconds_per_token: 0.05327
+            image_seconds: 0.052
+            provider_endpoint: deepinfra/fp8
+          pricing:
+            input_per_million_usd: 0.15
+            output_per_million_usd: 0.60
+        - name: model_9a74
+          kind: vlm
+          parameter_count: 235B total, 22B active
+          provider: openrouter
+          model: qwen/qwen3-vl-235b-a22b-instruct
+          latency:
+            base_seconds: 0.588
+            input_seconds_per_token: 0.000085
+            output_seconds_per_token: 0.05293
+            image_seconds: 1.722
+            provider_endpoint: parasail/fp8
+          pricing:
+            input_per_million_usd: 0.21
+            output_per_million_usd: 1.90
+
+        # Active OpenRouter proprietary multimodal pool.
+        - name: model_61f8
+          kind: vlm
+          parameter_count: undisclosed
+          provider: openrouter
+          model: google/gemini-2.5-flash-lite
+          latency:
+            base_seconds: 0.920
+            input_seconds_per_token: 0.000067
+            output_seconds_per_token: 0.00397
+            image_seconds: 1.097
+            provider_endpoint: google-ai-studio
+          extra_body:
+            reasoning:
+              enabled: false
+          pricing:
+            input_per_million_usd: 0.10
+            output_per_million_usd: 0.40
+        - name: model_d903
+          kind: vlm
+          parameter_count: undisclosed
+          provider: openrouter
+          model: anthropic/claude-haiku-4.5
+          latency:
+            base_seconds: 1.189
+            input_seconds_per_token: 0.000035
+            output_seconds_per_token: 0.01151
+            image_seconds: 0.904
+            provider_endpoint: anthropic
+          extra_body:
+            reasoning:
+              enabled: false
+          pricing:
+            input_per_million_usd: 1.00
+            output_per_million_usd: 5.00
+        - name: model_0ab7
+          kind: vlm
+          parameter_count: undisclosed
+          provider: openrouter
+          model: openai/gpt-5.6-luna
+          latency:
+            base_seconds: 1.697
+            input_seconds_per_token: 0.000088
+            output_seconds_per_token: 0.00809
+            image_seconds: 0.282
+            provider_endpoint: azure
+          extra_body:
+            reasoning:
+              enabled: false
+          pricing:
+            input_per_million_usd: 0.50
+            output_per_million_usd: 3.00
+
+        # Active OpenRouter text pool.
+        - name: model_7ab3
+          kind: llm
+          parameter_count: 3B
+          provider: openrouter
+          model: meta-llama/llama-3.2-3b-instruct
+          latency:
+            base_seconds: 1.231
+            input_seconds_per_token: 0.000048
+            output_seconds_per_token: 0.00554
+            image_seconds: 0.0
+            provider_endpoint: parasail/bf16
+          pricing:
+            input_per_million_usd: 0.05
+            output_per_million_usd: 0.33
+        - name: model_5e1c
+          kind: llm
+          parameter_count: 8B
+          provider: openrouter
+          model: meta-llama/llama-3.1-8b-instruct
+          latency:
+            base_seconds: 0.439
+            input_seconds_per_token: 0.000036
+            output_seconds_per_token: 0.00499
+            image_seconds: 0.0
+            provider_endpoint: groq
+          pricing:
+            input_per_million_usd: 0.05
+            output_per_million_usd: 0.08
+        - name: model_a6d9
+          kind: llm
+          parameter_count: 70B
+          provider: openrouter
+          model: meta-llama/llama-3.3-70b-instruct
+          latency:
+            base_seconds: 0.475
+            input_seconds_per_token: 0.000092
+            output_seconds_per_token: 0.02194
+            image_seconds: 0.0
+            provider_endpoint: akashml/fp8
+          pricing:
+            input_per_million_usd: 0.13
+            output_per_million_usd: 0.40
+        - name: model_4f6a
+          kind: llm
+          parameter_count: 30B total, 3B active
+          provider: openrouter
+          model: qwen/qwen3-30b-a3b-instruct-2507
+          latency:
+            base_seconds: 0.524
+            input_seconds_per_token: 0.000045
+            output_seconds_per_token: 0.00533
+            image_seconds: 0.0
+            provider_endpoint: coreweave/bf16
+          pricing:
+            input_per_million_usd: 0.10
+            output_per_million_usd: 0.30
+        - name: model_c1e7
+          kind: llm
+          parameter_count: 80B total, 3B active
+          provider: openrouter
+          model: qwen/qwen3-next-80b-a3b-instruct
+          latency:
+            base_seconds: 0.517
+            input_seconds_per_token: 0.000052
+            output_seconds_per_token: 0.01126
+            image_seconds: 0.0
+            provider_endpoint: parasail/fp8
+          pricing:
+            input_per_million_usd: 0.10
+            output_per_million_usd: 1.10
+        - name: model_82ad
+          kind: llm
+          parameter_count: 235B total, 22B active
+          provider: openrouter
+          model: qwen/qwen3-235b-a22b-2507
+          latency:
+            base_seconds: 0.797
+            input_seconds_per_token: 0.00005
+            output_seconds_per_token: 0.0588
+            image_seconds: 0.0
+            provider_endpoint: deepinfra/fp8
+          pricing:
+            input_per_million_usd: 0.09
+            output_per_million_usd: 0.55
+
+  - class_name: tools.runtime_memory_tool.RetrieveMemoryTool
+    config: *runtime_memory_config

@@ -1,0 +1,2 @@
+- name: rollout_ordered_tool_agent
+  _target_: agent_loops.rollout_ordered_tool_agent.RolloutOrderedToolAgentLoop

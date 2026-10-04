@@ -1,0 +1,2 @@
+# Official Linux x86_64 wheel for Python 3.12, PyTorch 2.8, and CUDA 12.x.
+flash-attn @ https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3%2Bcu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
