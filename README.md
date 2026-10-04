@@ -1,6 +1,23 @@
-# MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents
+<h1 align="center">MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents</h1>
 
-[News](#news) · [Installation](#installation) · [Training](#training) · [Evaluation](#evaluation) · [Citation](#citation)
+<p align="center">
+  <a href="https://viktoraxelsen.github.io/MemPilot/"><img src="https://img.shields.io/badge/Project-Page-2878D0?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="Project Page"></a>
+  <img src="https://img.shields.io/badge/arXiv-Coming_Soon-B31B1B?style=for-the-badge&amp;logo=arxiv&amp;logoColor=white" alt="arXiv: Coming soon">
+  <a href="https://hf.co/collections/XaiverZ/mempilot"><img src="https://img.shields.io/badge/HuggingFace-Collection-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=FFD21E" alt="Hugging Face Collection"></a>
+  <br>
+  <a href="https://github.com/ViktorAxelsen/MemPilot/stargazers"><img src="https://img.shields.io/github/stars/ViktorAxelsen/MemPilot?style=for-the-badge&amp;color=E6B655&amp;logo=github&amp;logoColor=white" alt="GitHub Stars"></a>
+  <a href="https://github.com/ViktorAxelsen/MemPilot/forks"><img src="https://img.shields.io/github/forks/ViktorAxelsen/MemPilot?style=for-the-badge&amp;color=279A83&amp;logo=git&amp;logoColor=white" alt="GitHub Forks"></a>
+  <a href="https://github.com/ViktorAxelsen/MemPilot/issues"><img src="https://img.shields.io/github/issues/ViktorAxelsen/MemPilot?style=for-the-badge&amp;color=7C64B5&amp;logo=github&amp;logoColor=white" alt="GitHub Issues"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-2EA44F?style=for-the-badge" alt="License: Apache 2.0"></a>
+</p>
+
+<p align="center">
+  <a href="#news">News</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#training">Training</a> ·
+  <a href="#evaluation">Evaluation</a> ·
+  <a href="#citation">Citation</a>
+</p>
 
 <a id="overview"></a>
 
