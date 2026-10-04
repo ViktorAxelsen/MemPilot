@@ -1,6 +1,10 @@
 # MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents
 
-## Overview
+[News](#news) · [Installation](#installation) · [Training](#training) · [Evaluation](#evaluation) · [Citation](#citation)
+
+<a id="overview"></a>
+
+## 🧠 Overview
 
 **MemPilot** learns how to gather and process multimodal memory at query time.
 A policy chooses what evidence to access, which LLM/VLM to use, when images are
@@ -17,7 +21,16 @@ needed, and when to stop gathering evidence and answer.
 The default memory bank is built offline with LLMLingua-2. An existing bank from
 another system can replace it through the [memory adapter](#using-an-existing-memory-bank).
 
-## Installation
+<a id="news"></a>
+
+## 📰 News
+
+- 🚀 **[2026-10-05]** We release **MemPilot**, our framework for on-demand multimodal
+  memory curation.
+
+<a id="installation"></a>
+
+## 🚀 Installation
 
 Run commands from the repository root. The environment targets **Linux x86_64,
 Python 3.12 and NVIDIA GPUs**.
@@ -40,7 +53,9 @@ python -m pip check
 The setup uses verl 0.8.0, PyTorch 2.8 and vLLM 0.11.0. The supplied FlashAttention
 wheel is for Python 3.12 and PyTorch 2.8 on Linux x86_64.
 
-## Configuration
+<a id="configuration"></a>
+
+## ⚙️ Configuration
 
 Edit training settings in [`scripts/train.sh`](scripts/train.sh) and evaluation
 settings in [`scripts/eval_common.sh`](scripts/eval_common.sh). Set credentials
@@ -61,7 +76,9 @@ use separate `ANSWER_API_KEY` / `ANSWER_BASE_URL` and `JUDGE_API_KEY` /
 Configure the CURATE model pool and resource profiles in
 [`configs/runtime_memory_tool.yaml`](configs/runtime_memory_tool.yaml).
 
-## Preparing data
+<a id="preparing-data"></a>
+
+## 📦 Preparing data
 
 Converters download their datasets from Hugging Face by default. Use
 `--dataset_dir` for local data and `--help` for preprocessing options.
@@ -96,7 +113,9 @@ python -m data.prepare_memlens_verl \
   --context_length 32k --evaluation_subset agent --output_dir data/memlens_32k_agent
 ```
 
-## Training
+<a id="training"></a>
+
+## 🏋️ Training
 
 Set the model, GPUs, resource weights and training parameters in `scripts/train.sh`:
 
@@ -116,7 +135,9 @@ Checkpoints are saved under `checkpoints/<project>/<run_name>/`; console and
 model-call logs are saved under `logs/`. Set `LOGGER='["console"]'` in the script
 to disable W&B logging.
 
-## Evaluation
+<a id="evaluation"></a>
+
+## 🧪 Evaluation
 
 Configure the policy model, GPUs, answer model and judge in `scripts/eval_common.sh`.
 `MODEL_PATH` must match the trained policy. By default, answer replacement uses
@@ -162,7 +183,9 @@ reuse its progress cache when that stage is rerun; policy inference does not res
 Set `ANSWER_BACKEND=openai`, `ANSWER_MODEL` and `ANSWER_BASE_URL` for API-based
 answer replacement. Custom answer models also need a resource profile in the YAML.
 
-## Using an existing memory bank
+<a id="using-an-existing-memory-bank"></a>
+
+## 🔌 Using an existing memory bank
 
 Choose **either the default LLMLingua bank or an external bank** through the
 prepared data path. The adapter replaces the RETRIEVE corpus and its index;
@@ -194,8 +217,33 @@ DATA_DIR=data/multimodal_external bash scripts/train.sh
 For evaluation, convert each benchmark directory and point its `*_TEST_FILE`
 setting at the resulting `test.parquet`. No memory-mode switch is needed.
 
-## Acknowledgments
+<a id="acknowledgments"></a>
 
-MemPilot builds on [verl](https://github.com/verl-project/verl),
-[LLMLingua](https://github.com/microsoft/LLMLingua),
-[vLLM](https://github.com/vllm-project/vllm), and the supported benchmark datasets.
+## 🙏 Acknowledgments
+
+We thank the [verl](https://github.com/verl-project/verl) team for their open-source
+RL training framework, and the authors of
+**[Mem-Gallery](https://github.com/YuanchenBei/Mem-Gallery)**,
+**[WorldMemArena](https://github.com/UCSB-AI/WorldMemArena)**,
+**[H2HMem](https://github.com/varib1/H2HMEM)**,
+**[MemEye](https://github.com/MinghoKwok/MemEye)**, and
+**[MEMLENS](https://github.com/xrenaf/MEMLENS)** for their benchmarks and evaluation resources.
+
+<a id="citation"></a>
+
+## 📚 Citation
+
+If you find MemPilot useful in your research, please consider citing:
+
+```bibtex
+@misc{zhang2026mempilot,
+  title  = {MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents},
+  author = {Haozhen Zhang and Haodong Yue and Quanyu Long and Jianzhu Bao and
+            Qingyuan Liu and Tao Feng and Bohan Liu and Weida Liang and Wenya Wang},
+  year   = {2026},
+  note   = {Manuscript},
+  url    = {https://github.com/ViktorAxelsen/MemPilot}
+}
+```
+
+*arXiv identifier coming soon.*
