@@ -7,7 +7,7 @@ window.MEMPILOT_DATA = {
   benchmarks: [
     { id: 'gallery', name: 'Mem-Gallery', setting: 'In-domain evaluation' },
     { id: 'world', name: 'WorldMemArena', setting: 'In-domain · Lifelong' },
-    { id: 'h2h', name: 'H2HMem', setting: 'In-domain · Dyadic' },
+    { id: 'h2h', name: 'H2HMem', setting: 'In-domain · Dyadic + multiparty' },
     { id: 'eye', name: 'MemEye', setting: 'Out-of-distribution · Open' },
     { id: 'lens', name: 'MemLens', setting: 'Out-of-distribution · 32K agent' }
   ],

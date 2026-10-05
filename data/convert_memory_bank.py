@@ -1,9 +1,12 @@
 """Adapt an existing memory system's output into MemPilot's compressed corpus.
 
+Banks belong to a conversation, or to a conversation checkpoint when its history
+changes over time. All questions at that scope share the same bank.
+
 This is an offline format adapter, not a memory builder. Only the compressed
-corpus and its index are replaced; raw history, images, labels and splits stay
-in the prepared parquet rows. Customize ``convert_memory_items`` for richer
-source formats instead of adding system-specific branches to runtime tools.
+corpus and its index are replaced; raw history, images, questions, labels and
+splits stay in the prepared parquet rows. Customize ``convert_memory_items``
+for richer source formats instead of adding branches to runtime tools.
 """
 
 from __future__ import annotations
@@ -14,10 +17,14 @@ import hashlib
 import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+from shutil import copyfile
 from typing import Any
 
 from data.memory_qa import write_parquet
 from retrieval import EmbeddingRetriever, QWEN3_RETRIEVER, serialize_document_embeddings
+
+
+MemoryScope = tuple[str, str] | tuple[str, str, str]
 
 
 def convert_memory_items(
@@ -49,14 +56,22 @@ def convert_memory_items(
     return bank
 
 
-def _scope(record: Mapping[str, Any]) -> tuple[str, str, str]:
-    """Use an exact QA scope, including checkpoint visibility where applicable."""
-    values = tuple(str(record.get(key, "")).strip() for key in (
-        "data_source", "conversation_id", "question_id"
-    ))
+def _scope(record: Mapping[str, Any]) -> MemoryScope:
+    """Identify a conversation's history version independently of question_id."""
+    values = tuple(str(record.get(key, "")).strip() for key in ("data_source", "conversation_id"))
     if any(not value or value == "None" for value in values):
-        raise ValueError("Memory records require data_source, conversation_id and question_id.")
-    return values
+        raise ValueError("Memory scopes require non-empty data_source and conversation_id.")
+    checkpoint = record.get("checkpoint_id")
+    if checkpoint is None:
+        return values
+    checkpoint = str(checkpoint).strip()
+    if not checkpoint or checkpoint == "None":
+        raise ValueError("checkpoint_id must be non-empty when provided; omit it or use null for unversioned history.")
+    return (*values, checkpoint)
+
+
+def _row_scope(row: Mapping[str, Any]) -> MemoryScope:
+    return _scope({**row["extra_info"], "data_source": row["data_source"]})
 
 
 def load_memory_banks(
@@ -65,21 +80,28 @@ def load_memory_banks(
     items_field: str = "memories",
     text_field: str = "text",
     id_field: str = "id",
-) -> dict[tuple[str, str, str], list[dict[str, str]]]:
-    """Read JSON/JSONL scope records; never broadcast a bank across QA scopes."""
+) -> dict[MemoryScope, list[dict[str, str]]]:
+    """Read one bank per conversation or conversation checkpoint from JSON/JSONL.
+
+    question_id is ignored. Checkpointed banks are matched exactly; they are never
+    reused for another checkpoint or for a row without checkpoint metadata.
+    """
     path = Path(path)
     with path.open(encoding="utf-8") as handle:
         records = ([json.loads(line) for line in handle if line.strip()]
                    if path.suffix.lower() == ".jsonl" else json.load(handle))
     if not isinstance(records, list):
-        raise ValueError("The external memory file must contain a list of scope records.")
+        raise ValueError("The external memory file must contain a list of conversation/checkpoint records.")
     banks = {}
     for record in records:
         if not isinstance(record, Mapping):
-            raise ValueError("Each scope record must be a mapping.")
+            raise ValueError("Each conversation/checkpoint record must be a mapping.")
         key = _scope(record)
         if key in banks:
-            raise ValueError(f"Duplicate external memory scope: {key!r}.")
+            raise ValueError(
+                f"Duplicate external memory for conversation/checkpoint scope: {key!r}. "
+                "Export one bank per scope, shared by all its questions."
+            )
         banks[key] = convert_memory_items(
             record.get(items_field), text_field=text_field, id_field=id_field
         )
@@ -111,14 +133,16 @@ def replace_compressed_memory(
             serialize_document_embeddings(retriever.encode_documents(bank), model_id=retriever.model_id)
             if bank else ""
         )
-    create_kwargs["compressed_memory_bank"] = serialized
-    create_kwargs["lossy_memory_index"] = index_cache[key]
     # RuntimeMemoryDataset shares this state with both tools at load time.
-    # Update a materialized RETRIEVE state too if the input already has one,
-    # without duplicating large raw banks in ordinary preprocessing output.
+    # Update an already-materialized RETRIEVE state without overwriting its
+    # raw history, question metadata or any other tool-specific settings.
     tools_kwargs = extra_info["tools_kwargs"]
-    if "retrieve_memory" in tools_kwargs:
-        tools_kwargs["retrieve_memory"] = copy.deepcopy(tools_kwargs["runtime_memory"])
+    for tool_name in ("runtime_memory", "retrieve_memory"):
+        tool_state = tools_kwargs.get(tool_name)
+        if tool_state is not None:
+            tool_state["create_kwargs"].update(
+                compressed_memory_bank=serialized, lossy_memory_index=index_cache[key]
+            )
     return prepared
 
 
@@ -126,7 +150,7 @@ def convert_prepared_splits(
     *,
     input_dir: str | Path,
     output_dir: str | Path,
-    banks: Mapping[tuple[str, str, str], list[dict[str, str]]],
+    banks: Mapping[MemoryScope, list[dict[str, str]]],
     retriever: Any,
 ) -> dict[str, int]:
     """Convert existing train/val/test splits, including test-only OOD datasets."""
@@ -143,13 +167,18 @@ def convert_prepared_splits(
         raise ValueError("Choose a separate output directory without existing parquet splits.")
 
     splits = {path.name: pq.read_table(path).to_pylist() for path in paths}
-    # Validate complete coverage before embedding or writing any output. A
-    # missing scope is an error, not a fallback to a different memory system.
-    for rows in splits.values():
-        for row in rows:
-            key = _scope({**row["extra_info"], "data_source": row["data_source"]})
-            if key not in banks:
-                raise ValueError(f"Missing external memory for QA scope: {key!r}.")
+    # Coverage is per history version, not per question. Validate every split
+    # before embedding/writing, and never fall back to another history version.
+    required_scopes = {_row_scope(row) for rows in splits.values() for row in rows}
+    missing = sorted(required_scopes - banks.keys())
+    if missing:
+        preview = missing[:5]
+        suffix = " ..." if len(missing) > len(preview) else ""
+        raise ValueError(
+            f"Missing external memory for {len(missing)} conversation/checkpoint scope(s) "
+            f"(data_source, conversation_id[, checkpoint_id]): {preview!r}{suffix}. "
+            "Provide one bank per scope. Checkpointed rows require an exact checkpoint_id match."
+        )
 
     destination.mkdir(parents=True, exist_ok=True)
     index_cache: dict[str, str] = {}
@@ -157,11 +186,15 @@ def convert_prepared_splits(
     for name, rows in splits.items():
         converted = []
         for row in tqdm(rows, desc=f"Converting {name}", unit="row"):
-            key = _scope({**row["extra_info"], "data_source": row["data_source"]})
+            key = _row_scope(row)
             converted.append(replace_compressed_memory(
                 row, banks[key], retriever=retriever, index_cache=index_cache
             ))
-        write_parquet(converted, destination / name)
+        if converted:
+            write_parquet(converted, destination / name)
+        else:
+            # Re-inferring an empty table would discard the prepared schema.
+            copyfile(source / name, destination / name)
         counts[name] = len(converted)
     return counts
 
@@ -169,7 +202,10 @@ def convert_prepared_splits(
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input_dir", required=True, help="Prepared LLMLingua or raw-only parquet directory.")
-    parser.add_argument("--memory_file", required=True, help="External memory scope records in JSON or JSONL.")
+    parser.add_argument(
+        "--memory_file", required=True,
+        help="JSON/JSONL with one bank per data_source + conversation_id, plus checkpoint_id for versioned history.",
+    )
     parser.add_argument("--output_dir", required=True, help="Separate directory consumed by existing launchers.")
     parser.add_argument("--items_field", default="memories")
     parser.add_argument("--text_field", default="text")

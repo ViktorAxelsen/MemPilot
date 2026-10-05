@@ -16,6 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from data.hf_download import add_hf_download_argument, configure_hf_downloads  # noqa: E402
 from data.memory_qa import (  # noqa: E402
     DEFAULT_TRAIN_RATIO,
     DEFAULT_VALIDATION_RATIO,
@@ -68,6 +69,7 @@ QA_GUIDANCE = (
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    add_hf_download_argument(parser)
     parser.add_argument(
         "--dataset_dir",
         default=None,
@@ -107,6 +109,7 @@ def main() -> None:
     parser.add_argument("--train_subset_size", type=int, default=None)
     parser.add_argument("--seed", type=int, default=13)
     args = parser.parse_args()
+    configure_hf_downloads(args.hf_download_rps)
 
     records = load_mem_gallery_records(args.dataset_dir, args.dataset_name)
     compressor = None
