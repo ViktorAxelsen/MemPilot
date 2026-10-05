@@ -237,7 +237,7 @@ td { font-family: var(--mono); font-size: 11px; }
 .allocation-direction { display: flex; align-items: center; gap: 15px; color: var(--green); font: 9px var(--mono); letter-spacing: .02em; margin: 33px 0 19px; }
 .direction-line { flex: 1; height: 1px; background: #d7e3d4; position: relative; }
 .direction-line::after { content: ''; position: absolute; right: 0; top: -2px; width: 5px; height: 5px; border-top: 1px solid #b2c2aa; border-right: 1px solid #b2c2aa; transform: rotate(45deg); }
-.allocation-table { border-collapse: separate; border-spacing: 6px; min-width: 560px; margin-left: -6px; width: calc(100% + 12px); }
+.allocation-table { border-collapse: separate; border-spacing: 6px; min-width: 560px; margin-left: 0; width: 100%; }
 .allocation-table caption { position: absolute; clip: rect(0,0,0,0); width: 1px; height: 1px; overflow: hidden; }
 .allocation-table th, .allocation-table td { border: 0; padding: 12px 14px; }
 .allocation-table thead { background: none; }

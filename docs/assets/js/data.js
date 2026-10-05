@@ -1,7 +1,7 @@
 /* Transcribed from the supplied MemPilot manuscript, Table 1 (p. 7).
  * Each row contains [F1 (%), LLM-Judge (%), reported cost (USD/sample)].
  * Cost uses the paper's dataset-conversation normalization (Appendix A.4),
- * not cost per question. MemEye and MemLens are transfer-only evaluations.
+ * not cost per question. MemEye and MEMLENS are transfer-only evaluations.
  */
 window.MEMPILOT_DATA = {
   benchmarks: [
@@ -9,7 +9,7 @@ window.MEMPILOT_DATA = {
     { id: 'world', name: 'WorldMemArena', setting: 'In-domain · Lifelong' },
     { id: 'h2h', name: 'H2HMem', setting: 'In-domain · Dyadic + multiparty' },
     { id: 'eye', name: 'MemEye', setting: 'Out-of-distribution · Open' },
-    { id: 'lens', name: 'MemLens', setting: 'Out-of-distribution · 32K agent' }
+    { id: 'lens', name: 'MEMLENS', setting: 'Out-of-distribution · 32K agent' }
   ],
   methods: ['A-Mem', 'SimpleMem', 'MIRIX', 'M2A', 'MemVerse', 'GAM', 'AgeMem', 'Mem-T', 'MemPilot-Perf', 'MemPilot-Bal', 'MemPilot-Cost'],
   models: {

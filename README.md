@@ -16,10 +16,16 @@
 </p>
 
 <p align="center">
+  <a href="#overview">Overview</a> ·
   <a href="#news">News</a> ·
   <a href="#installation">Installation</a> ·
+  <a href="#configuration">Configuration</a> ·
+  <a href="#preparing-data">Data Preparation</a>
+  <br>
   <a href="#training">Training</a> ·
   <a href="#evaluation">Evaluation</a> ·
+  <a href="#using-an-existing-memory-bank">Existing Memory Bank</a> ·
+  <a href="#acknowledgments">Acknowledgments</a> ·
   <a href="#citation">Citation</a>
 </p>
 
@@ -33,9 +39,9 @@ needed, and when to stop gathering evidence and answer.
 
 - **Two memory actions:** RETRIEVE accesses a query-agnostic memory bank; CURATE
   delegates query-specific curation of raw multimodal history to a selected LLM/VLM.
-- **Resource-aware training:** GDPO combines answer quality, cost and latency
-  preferences, with marginal utility credit for memory-gathering stages.
-- **Joint training and transfer evaluation:** train on Mem-Gallery,
+- **Resource-aware training:** Optimize answer quality, cost, and latency under
+  chosen preferences, with marginal utility credit for memory-gathering stages.
+- **Joint training and transfer evaluation:** Train on Mem-Gallery,
   WorldMemArena-Lifelong, and H2HMem (both dyadic and multiparty variants).
   Evaluate on their held-out test sets, with MemEye Open and MEMLENS 32K-Agent
   used exclusively for out-of-distribution evaluation.
@@ -76,7 +82,7 @@ python -m pip install -r requirements-flash-attn.txt
 python -m pip check
 ```
 
-The setup uses verl 0.8.0, PyTorch 2.8 and vLLM 0.11.0. The supplied FlashAttention
+The setup uses VeRL 0.8.0, PyTorch 2.8 and vLLM 0.11.0. The supplied FlashAttention
 wheel is for Python 3.12 and PyTorch 2.8 on Linux x86_64.
 
 <a id="configuration"></a>
@@ -277,7 +283,7 @@ bash scripts/train.sh
 
 `DATA_DIR` can be supplied through the environment. The other shell variables
 listed above are assigned in the script and can be edited there. For options
-exposed by verl/Hydra, command-line overrides are applied after the script defaults.
+exposed by VeRL/Hydra, command-line overrides are applied after the script defaults.
 
 For example, use a different prepared directory and train for five epochs:
 
@@ -337,7 +343,7 @@ before launching. The defaults for this evaluation setup are:
 | Answer model (comparison only) | `ANSWER_BACKEND`, `ANSWER_MODEL`, `ANSWER_CUDA_VISIBLE_DEVICES` | Local `vllm`, `Qwen/Qwen3-VL-4B-Instruct`, device `0` |
 | Judge | `JUDGE_MODEL`, `JUDGE_BASE_URL` | `openai/gpt-4o-mini` through OpenRouter |
 
-`MODEL_PATH` must match the model used to train the checkpoint. Pass a verl
+`MODEL_PATH` must match the model used to train the checkpoint. Pass a VeRL
 `global_step_<step>` directory to `--checkpoint-path`. Use the shared provider
 credentials from [Configuration](#configuration), or set `ANSWER_API_KEY` and
 `JUDGE_API_KEY` for separate answer and judge services.

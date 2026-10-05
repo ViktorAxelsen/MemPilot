@@ -111,9 +111,9 @@
     answer: {
       tag: 'DECISION / CONTINUE OR ANSWER',
       headline: 'Enough evidence? Bring it together.',
-      description: 'Append the returned observations to the current state. The policy can retrieve again, delegate further curation, or end the trajectory and produce an answer, up to a fixed maximum number of steps.',
+      description: 'After each memory operation, the policy can retrieve again, delegate further curation, or directly generate the final answer from the accumulated evidence.',
       controls: [['Query', 'q'], ['Accumulated evidence', 'o'], ['Final answer', 'y']],
-      note: 'For Table 1, curated evidence is passed to a separate, non-RL-trained answer model, isolating the quality of the memory.'
+      note: 'No separate answer model is needed in normal use.'
     }
   };
   const methodButtons = selectAll('[data-step]');
@@ -206,6 +206,7 @@
         });
       });
     }, { rootMargin: '-15% 0px -60% 0px', threshold: 0 });
+    observer.observe(select('.hero'));
     ['idea', 'method', 'results', 'frontiers', 'analysis', 'citation'].forEach((id) => observer.observe(document.getElementById(id)));
   }
 })();

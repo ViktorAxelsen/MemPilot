@@ -8,7 +8,9 @@
   <meta property="og:title" content="MemPilot · Memory, on demand.">
   <meta property="og:description" content="Orchestrating On-Demand Multimodal Memory Curation for LLM Agents. Explore the method, results, and open-source code.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://viktoraxelsen.github.io/MemPilot/">
   <title>MemPilot · Orchestrating On-Demand Multimodal Memory Curation</title>
+  <link rel="canonical" href="https://viktoraxelsen.github.io/MemPilot/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="assets/js/data.js" defer></script>
@@ -49,6 +51,7 @@
           <div class="hero-actions">
             <button class="button button-primary" id="paper-link" type="button" disabled><svg class="icon" aria-hidden="true"><use href="#i-paper"/></svg> Paper · Coming soon</button>
             <a class="button button-secondary" href="https://github.com/ViktorAxelsen/MemPilot" target="_blank" rel="noopener noreferrer"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg> Code</a>
+            <a class="button button-secondary" href="https://hf.co/collections/XaiverZ/mempilot" target="_blank" rel="noopener noreferrer">Hugging Face <svg class="icon" aria-hidden="true"><use href="#i-external"/></svg></a>
           </div>
           <p class="release-note">arXiv <span>Coming soon</span><span class="release-divider">/</span><a href="#citation">Cite this work <span aria-hidden="true">↗</span></a></p>
         </div>
@@ -98,17 +101,17 @@
       <div class="section-heading"><h2 id="method-title">A policy at the helm.</h2><p>Retrieve. Curate. Reassess.<br> Continue until the evidence is enough.</p></div>
       <div class="method-layout">
         <div class="method-steps" role="group" aria-label="Explore memory actions">
-          <button class="method-step is-active" type="button" data-step="retrieve" aria-pressed="true" aria-controls="method-detail"><span class="step-number">01</span><span><strong>Retrieve a memory</strong><small>Start with what is already there.</small></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+          <button class="method-step is-active" type="button" data-step="retrieve" aria-pressed="true" aria-controls="method-detail"><span class="step-number">01</span><span><strong>Retrieve a memory</strong><small>Access existing evidence.</small></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
           <button class="method-step" type="button" data-step="curate" aria-pressed="false" aria-controls="method-detail"><span class="step-number">02</span><span><strong>Curate on demand</strong><small>Go back to the original evidence.</small></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
           <button class="method-step" type="button" data-step="answer" aria-pressed="false" aria-controls="method-detail"><span class="step-number">03</span><span><strong>Decide again, or answer</strong><small>Let evidence guide the next move.</small></span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-          <p class="method-note">A flexible decision loop: actions can repeat, and multiple calls can run in parallel.</p>
+          <p class="method-note">A flexible decision loop: choose either action, repeat as needed, and run independent operations in parallel.</p>
         </div>
         <div class="method-detail" id="method-detail" aria-live="polite" aria-atomic="true">
           <span class="detail-tag" id="method-tag">ACTION / RETRIEVE</span><h3 id="method-headline">Useful memory, without another model call.</h3><p id="method-description">Search the query-agnostic memory bank with a learned retrieval query and evidence count. The bank can come from an existing memory system; retrieved text returns directly to the orchestrator.</p>
           <div class="control-chips" id="method-controls"><span>Retrieval query <i>r</i></span><span>Evidence count <i>k</i></span></div><p class="detail-footnote" id="method-footnote">The default bank uses LLMLingua-2. Raw text and images remain available for later curation.</p>
         </div>
       </div>
-      <div class="training-strip"><div><span class="mini-label">HOW THE POLICY LEARNS</span><h3>Reward the outcome.<br> Credit the useful steps.</h3></div><div><strong>Separate the objectives</strong><p>Normalize quality, cost, and latency advantages independently, then combine them using the chosen preference weights.</p></div><div><strong>Measure marginal utility</strong><p>Probe an answer before and after each curation stage. The change in answer quality gives that stage a more precise learning signal.</p></div></div>
+      <div class="training-strip"><div><span class="mini-label">HOW THE POLICY LEARNS</span><h3>Reward the outcome.<br> Credit the useful steps.</h3></div><div><strong>Separate the objectives</strong><p>Normalize quality, cost, and latency advantages independently, then combine them using the chosen preference weights.</p></div><div><strong>Measure marginal utility</strong><p>The policy probes an answer before and after each memory-gathering stage. The change in answer quality provides a learning signal for that stage.</p></div></div>
       <figure class="paper-figure architecture-figure"><a class="figure-open" href="assets/figures/architecture.png" data-figure-title="MemPilot architecture · Figure 1"><img src="assets/figures/architecture.png" width="1564" height="588" loading="lazy" alt="Paper architecture: the orchestrator selects RETRIEVE or CURATE; factorized controls govern evidence, instructions, model selection and visual access. Training combines objective-wise advantage decoupling with prefix-based marginal utility."><span class="expand-label"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg> Expand figure</span></a><figcaption><span>FIG. 01</span> On-demand memory orchestration and resource-aware training.<span class="paper-reference">Paper, §3</span></figcaption></figure>
     </div></section>
 
@@ -116,7 +119,7 @@
       <div class="section-label"><span>03</span> THE EVIDENCE</div>
       <div class="section-heading"><h2 id="results-title">Better answers.<br> Room to choose.</h2><p>Five multimodal benchmarks. Two answer models.<br> Explore quality and cost at three operating points.</p></div>
       <div class="results-explorer">
-        <div class="results-toolbar"><div class="benchmark-tabs" role="group" aria-label="Select benchmark"><button type="button" data-benchmark="0" aria-pressed="true" class="is-active">Mem-Gallery</button><button type="button" data-benchmark="1" aria-pressed="false">WorldMemArena</button><button type="button" data-benchmark="2" aria-pressed="false">H2HMem</button><button type="button" data-benchmark="3" aria-pressed="false">MemEye <span>OOD</span></button><button type="button" data-benchmark="4" aria-pressed="false">MemLens <span>OOD</span></button></div></div>
+        <div class="results-toolbar"><div class="benchmark-tabs" role="group" aria-label="Select benchmark"><button type="button" data-benchmark="0" aria-pressed="true" class="is-active">Mem-Gallery</button><button type="button" data-benchmark="1" aria-pressed="false">WorldMemArena</button><button type="button" data-benchmark="2" aria-pressed="false">H2HMem</button><button type="button" data-benchmark="3" aria-pressed="false">MemEye <span>OOD</span></button><button type="button" data-benchmark="4" aria-pressed="false">MEMLENS <span>OOD</span></button></div></div>
         <div class="results-subhead"><div><h3 id="benchmark-name">Mem-Gallery</h3><span class="setting-label" id="benchmark-setting">In-domain evaluation</span></div><label for="answer-model">Answer model<select id="answer-model"><option value="qwen4">Qwen3-VL-4B-Instruct</option><option value="qwen9">Qwen3.5-9B</option></select></label></div>
         <div class="result-main">
           <div class="bar-chart" aria-label="LLM-Judge comparison, scale from 0 to 100"><div class="chart-labels"><span>LLM-JUDGE (%) ↑</span><span>COST (USD/SAMPLE) ↓</span></div><div id="result-bars">
@@ -131,7 +134,7 @@
           <tr><th scope="row">A-Mem</th><td>54.24</td><td>51.45</td><td>$0.028</td></tr><tr><th scope="row">SimpleMem</th><td>27.32</td><td>32.00</td><td>$0.019</td></tr><tr><th scope="row">MIRIX</th><td>36.70</td><td>49.45</td><td>$0.33</td></tr><tr><th scope="row">M2A</th><td>39.05</td><td>50.73</td><td>$0.83</td></tr><tr><th scope="row">MemVerse</th><td>30.92</td><td>44.27</td><td>$0.47</td></tr><tr><th scope="row">GAM</th><td>43.46</td><td>46.36</td><td>$0.015</td></tr><tr><th scope="row">AgeMem</th><td>38.38</td><td>39.36</td><td>$0.03</td></tr><tr><th scope="row">Mem-T</th><td>36.18</td><td>34.55</td><td>$0.019</td></tr><tr class="ours"><th scope="row">MemPilot-Perf</th><td>53.73</td><td class="best">65.82</td><td>$0.043</td></tr><tr class="ours"><th scope="row">MemPilot-Bal</th><td class="best">57.26</td><td>64.27</td><td>$0.014</td></tr><tr class="ours"><th scope="row">MemPilot-Cost</th><td>32.67</td><td>39.09</td><td class="best">$0.0082</td></tr>
         </tbody></table></div><p class="table-note">Bold cells indicate the best result in each column. F1 and LLM-Judge are percentages; higher is better. Lower cost is better.</p></details>
       </div>
-      <p class="source-note"><span class="paper-reference">Source: Table 1</span><span>Cost follows the paper’s USD/sample accounting, normalized by unique dataset–conversation pairs (Appendix A.4). MemEye and MemLens are evaluated without training on either benchmark. Relative gains and cost savings use rounded table values.</span></p>
+      <p class="source-note"><span class="paper-reference">Source: Table 1</span><span>For fair comparison with baselines, final answers use the same answer model across methods. Cost follows the paper’s USD/sample accounting, normalized by unique dataset–conversation pairs (Appendix A.4). MemEye and MEMLENS are evaluated without training on either benchmark. Relative gains and cost savings use rounded table values.</span></p>
       <noscript><p class="no-script">Showing Mem-Gallery with Qwen3-VL-4B-Instruct. Enable JavaScript to switch benchmarks and models.</p></noscript>
     </section>
 
