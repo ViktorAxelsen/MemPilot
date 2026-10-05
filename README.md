@@ -343,10 +343,10 @@ before launching. The defaults for this evaluation setup are:
 | Answer model (comparison only) | `ANSWER_BACKEND`, `ANSWER_MODEL`, `ANSWER_CUDA_VISIBLE_DEVICES` | Local `vllm`, `Qwen/Qwen3-VL-4B-Instruct`, device `0` |
 | Judge | `JUDGE_MODEL`, `JUDGE_BASE_URL` | `openai/gpt-4o-mini` through OpenRouter |
 
-`MODEL_PATH` must match the model used to train the checkpoint. Pass a VeRL
-`global_step_<step>` directory to `--checkpoint-path`. Use the shared provider
-credentials from [Configuration](#configuration), or set `ANSWER_API_KEY` and
-`JUDGE_API_KEY` for separate answer and judge services.
+For VeRL training checkpoints, `MODEL_PATH` must match the model used to train
+the checkpoint. Pass its `global_step_<step>` directory to `--checkpoint-path`.
+Use the shared provider credentials from [Configuration](#configuration), or set
+`ANSWER_API_KEY` and `JUDGE_API_KEY` for separate answer and judge services.
 
 For H2HMem, merge the two prepared variants and select their combined test split:
 
@@ -386,6 +386,28 @@ bash scripts/eval.sh \
 Add `--datasets mem_gallery memeye` to evaluate a subset. All evaluation entry
 points accept `--help`, `--output-dir`, and `--datasets`; policy inference and
 the full evaluation script also require the checkpoint path.
+
+> [!NOTE]
+> The `perf-first/`, `balanced/`, and `cost-first/` folders on the
+> [`main` branch of XaiverZ/MemPilot-4B](https://huggingface.co/XaiverZ/MemPilot-4B/tree/main)
+> contain **merged, standard Hugging Face models**. Load the downloaded folder
+> directly.
+>
+> For these models, in the `python3 -m trainers.main_ppo_sync` command in
+> [`scripts/eval_policy.sh`](scripts/eval_policy.sh), keep
+> `actor_rollout_ref.model.path="$MODEL_PATH"` and change the two existing resume
+> arguments to `trainer.resume_mode=disable` and `trainer.resume_from_path=null`.
+> Then run, replacing the path with your downloaded model folder:
+>
+> ```bash
+> export MODEL_PATH=/path/to/perf-first
+> bash scripts/eval.sh \
+>   --checkpoint-path "$MODEL_PATH" \
+>   --output-dir eval_outputs/perf_first
+> ```
+>
+> The launcher still requires `--checkpoint-path`; passing the same model folder
+> satisfies its directory check while checkpoint resuming is disabled.
 
 For comparisons using Qwen3.5-9B through an API:
 
