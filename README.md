@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logos/logo.png" alt="MemPilot logo" width="300">
+</p>
+
 <h1 align="center">MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents</h1>
 
 <p align="center">
