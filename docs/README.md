@@ -30,13 +30,13 @@ under the `/MemPilot/` project path. `.nojekyll` preserves static-file serving.
   [MemSkill figure directory](https://github.com/ViktorAxelsen/MemSkill/tree/main/docs/static/figs),
   displayed with their original colors and proportions.
 
-When the arXiv paper is available, replace the disabled `#paper-link` button with
-a link, add the arXiv link in `.release-note`, and update the BibTeX entry and
-`.citation-note`. Update the root README's arXiv badge and citation as well.
-The `.paper-reference` spans retain table and section references;
-they can be turned into links to the public paper at the same time.
-Author order and affiliations follow the supplied author list. No acceptance
-status, author homepages, or arXiv identifier is inferred from the anonymous PDF.
+The paper is available as [arXiv:2610.06830](https://arxiv.org/abs/2610.06830).
+Both BibTeX entries use the same `@article` format, with metadata verified
+against arXiv. Keep `#paper-link`,
+`.release-note`, `.citation-note`, and the root README's arXiv badge and citation
+consistent when updating the paper. The `.paper-reference` spans retain table
+and section references. Author order is verified against arXiv; affiliations
+follow the supplied author list.
 
 ## Data and interpretation
 

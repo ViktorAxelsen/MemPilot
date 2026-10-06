@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://viktoraxelsen.github.io/MemPilot/"><img src="https://img.shields.io/badge/Project-Page-2878D0?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="Project Page"></a>
-  <img src="https://img.shields.io/badge/arXiv-Coming_Soon-B31B1B?style=for-the-badge&amp;logo=arxiv&amp;logoColor=white" alt="arXiv: Coming soon">
+  <a href="https://arxiv.org/abs/2610.06830"><img src="https://img.shields.io/badge/arXiv-2610.06830-B31B1B?style=for-the-badge&amp;logo=arxiv&amp;logoColor=white" alt="arXiv: 2610.06830"></a>
   <a href="https://hf.co/collections/XaiverZ/mempilot"><img src="https://img.shields.io/badge/HuggingFace-Collection-FFD21E?style=for-the-badge&amp;logo=huggingface&amp;logoColor=FFD21E" alt="Hugging Face Collection"></a>
   <br>
   <a href="https://github.com/ViktorAxelsen/MemPilot/stargazers"><img src="https://img.shields.io/github/stars/ViktorAxelsen/MemPilot?style=for-the-badge&amp;color=E6B655&amp;logo=github&amp;logoColor=white" alt="GitHub Stars"></a>
@@ -582,18 +582,13 @@ comparison, and transfer evaluation of multimodal agent memory systems.
 ## 📚 Citation
 
 If you use MemPilot in your research or build on this codebase, please cite the
-manuscript using the BibTeX entry below:
+[paper](https://arxiv.org/abs/2610.06830):
 
 ```bibtex
-@misc{zhang2026mempilot,
-  title  = {MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents},
-  author = {Haozhen Zhang and Haodong Yue and Quanyu Long and Jianzhu Bao and
-            Qingyuan Liu and Tao Feng and Bohan Liu and Weida Liang and Wenya Wang},
-  year   = {2026},
-  note   = {Manuscript},
-  url    = {https://github.com/ViktorAxelsen/MemPilot}
+@article{zhang2026mempilot,
+  title={MemPilot: Orchestrating On-Demand Multimodal Memory Curation for LLM Agents},
+  author={Zhang, Haozhen and Yue, Haodong and Long, Quanyu and Bao, Jianzhu and Liu, Qingyuan and Feng, Tao and Liu, Bohan and Liang, Weida and Wang, Wenya},
+  journal={arXiv preprint arXiv:2610.06830},
+  year={2026}
 }
 ```
-
-*arXiv identifier coming soon. This manuscript citation will be updated when
-the public paper is available.*
